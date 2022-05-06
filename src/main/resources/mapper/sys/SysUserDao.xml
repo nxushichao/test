@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gkdz.server.modules.sys.dao.SysUserDao">
+    <!-- 查询用户的所有权限 -->
+    <select id="queryAllPerms" resultType="string">
+        select m.perms from sys_user_role ur
+        LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+        LEFT JOIN sys_menu m on rm.menu_id = m.id
+        where ur.user_id = #{userId}
+    </select>
+
+    <!-- 查询用户的所有菜单ID -->
+    <select id="queryAllMenuId" resultType="long">
+        select distinct rm.menu_id from sys_user_role ur
+        LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id
+        where ur.user_id = #{userId}
+    </select>
+
+    <select id="queryByUserName" resultType="com.gkdz.server.modules.sys.entity.SysUserEntity">
+        select * from sys_user where username = #{username} and deleted = 0
+    </select>
+
+
+    <select id="queryPermsByRoleIds" resultType="string">
+        select m.perms from sys_role_menu rm left join sys_menu m on rm.menu_id=m.id
+        where rm.role_id in
+        <foreach item="roleId" collection="array" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+    </select>
+
+
+    <select id="queryByRoleId" resultType="com.gkdz.server.modules.sys.vo.SysUserVo">
+        SELECT
+        su.id as id,
+        su.username as username,
+        su.password as password,
+        su.name as name,
+        su.salt as salt,
+        su.mobile as mobile,
+        su.status as status,
+        su.create_by as createBy,
+        su.update_time as updateTime,
+        su.deleted as deleted,
+        su.photo as photo,
+        su.age as age,
+        su.level as level,
+        su.id_card as idCard,
+        su.leader as leader,
+        su.group_id as groupId,
+        su.face_id as faceId,
+        su.card_no as cardNo
+        FROM `sys_user` su
+        <if test="orgId != null">
+            LEFT JOIN sys_org_user sou ON su.id = sou.user_id
+        </if>
+        <where>
+            su.id in
+            <foreach collection="userIdList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="orgId != null">
+                and sou.org_id = #{orgId}
+            </if>
+            <if test="username !=null and username !='' ">
+                and username like concat('%',#{username},'%')
+            </if>
+            <if test="status !=null">
+                and status = #{status}
+            </if>
+            and deleted = 0
+        </where>
+    </select>
+    <select id="listByRoleId" resultType="com.gkdz.server.modules.sys.vo.SysUserVo">
+        select su.* from sys_user su
+        left join sys_user_role sur on su.id = sur.user_id
+        where sur.role_id in
+        <foreach collection="roleIdList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and su.deleted = 0;
+    </select>
+
+</mapper>

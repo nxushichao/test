@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gkdz.server.modules.sys.dao.SysOrgDao">
+
+    <select id="queryRoleListByOrgId" resultType="com.gkdz.server.modules.sys.entity.SysRoleEntity">
+        select r.id, r.role_name
+        from sys_org_role sor
+                 left JOIN sys_role r on sor.role_id = r.id
+        where sor.org_id = #{orgId}
+    </select>
+</mapper>
